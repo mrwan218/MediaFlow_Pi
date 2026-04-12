@@ -1,0 +1,22 @@
+{
+    "libraries": [
+        {
+            "name": "Serais",
+            "path": "\/c\/Users\/HP\/Downloads\/Solo.Leveling.Season.1.COMPLETE.ENG.720p.CR.WEB-DL.x264.S01.Full-MIKE",
+            "public": true
+        },
+        {
+            "name": "Movies",
+            "path": "\/c\/Users\/HP\/Downloads\/Video",
+            "public": true
+        }
+    ],
+    "supported_video_formats": [
+        "mp4",
+        "mkv",
+        "avi",
+        "mov",
+        "wmv"
+    ],
+    "tmdb_api_key": "6bdd792021e955dd99fd0a21c25397e3"
+}

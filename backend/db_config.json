@@ -1,0 +1,6 @@
+{
+    "host": "mysql",
+    "user": "mediaflow_user",
+    "password": "change_this_password",
+    "database": "mediaflow_db"
+}
