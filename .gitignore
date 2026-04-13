@@ -1,0 +1,25 @@
+# Environment files
+.env
+.env.local
+
+# Logs
+*.log
+backend/scan.log
+
+# Node modules
+backend/node_modules/
+
+# Database data (for local dev)
+mysql_data/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.swp

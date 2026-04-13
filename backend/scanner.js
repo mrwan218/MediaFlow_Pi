@@ -14,14 +14,42 @@ async function scan() {
     console.log("Starting MediaFlow Scanner (Docker Mode)...");
     
     // 1. Load Configs
-    if (!fs.existsSync(CONFIG_PATH) || !fs.existsSync(DB_CONFIG_PATH)) {
-        console.error("Configuration files missing.");
+    let config, dbConfig;
+    try {
+        if (fs.existsSync(CONFIG_PATH)) {
+            config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+        } else {
+            console.warn("config.json not found, using environment variables.");
+            config = {};
+        }
+        
+        if (fs.existsSync(DB_CONFIG_PATH)) {
+            dbConfig = JSON.parse(fs.readFileSync(DB_CONFIG_PATH, 'utf8'));
+        } else {
+            console.warn("db_config.json not found, using environment variables.");
+            dbConfig = {
+                host: process.env.DB_HOST || 'mysql',
+                user: process.env.DB_USER || 'mediaflow_user',
+                password: process.env.DB_PASSWORD || 'change_this_password',
+                database: process.env.DB_NAME || 'mediaflow_db'
+            };
+        }
+        
+        TMDB_API_KEY = config.tmdb_api_key || process.env.TMDB_API_KEY;
+        if (!TMDB_API_KEY) {
+            console.error("TMDB_API_KEY not found in config.json or environment variables.");
+            return;
+        }
+        
+        if (!config.libraries || config.libraries.length === 0) {
+            console.error("No libraries defined in config.json.");
+            return;
+        }
+        
+    } catch (err) {
+        console.error("Error loading configuration:", err.message);
         return;
     }
-
-    const config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
-    const dbConfig = JSON.parse(fs.readFileSync(DB_CONFIG_PATH, 'utf8'));
-    TMDB_API_KEY = config.tmdb_api_key;
 
     // 2. Connect to Database
     let connection;
