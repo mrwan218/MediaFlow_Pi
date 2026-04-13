@@ -1,17 +1,17 @@
 :root {
-    --primary-color: #ff4c67;
-    --primary-alt: #ff3851;
-    --accent-color: #68d6ff;
-    --bg-color: #07080c;
-    --surface-color: rgba(15,18,28,0.92);
-    --surface-strong: #0f1724;
-    --text-color: #eef2ff;
-    --text-muted: #9ca3af;
-    --border-color: rgba(255,255,255,0.08);
-    --shadow-color: rgba(0,0,0,0.45);
-    --navbar-bg: rgba(6, 8, 16, 0.92);
+    --primary-color: #E50914;
+    --primary-alt: #B20710;
+    --accent-color: #E50914;
+    --bg-color: #000000;
+    --surface-color: #333333;
+    --surface-strong: #1a1a1a;
+    --text-color: #FFFFFF;
+    --text-muted: #CCCCCC;
+    --border-color: #333333;
+    --shadow-color: rgba(0,0,0,0.5);
+    --navbar-bg: #000000;
     --transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
-    --radius: 22px;
+    --radius: 8px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,22 +20,10 @@ html, body { min-height: 100%; }
 
 body {
     font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background: radial-gradient(circle at top left, rgba(255,76,103,0.12), transparent 22%),
-                radial-gradient(circle at bottom right, rgba(104,214,255,0.08), transparent 18%),
-                linear-gradient(180deg, #05060a 0%, #090b11 100%);
+    background: #000000;
     color: var(--text-color);
     line-height: 1.6;
     overflow-x: hidden;
-}
-
-body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255,76,103,0.06), transparent 35%),
-                radial-gradient(circle at 80% 10%, rgba(255,255,255,0.08), transparent 18%),
-                radial-gradient(circle at 20% 90%, rgba(104,214,255,0.06), transparent 16%);
-    pointer-events: none;
 }
 
 .container {
@@ -165,22 +153,22 @@ button[type="submit"],
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-alt));
+    background: var(--primary-color);
     color: #ffffff;
     border: none;
-    border-radius: 999px;
+    border-radius: var(--radius);
     padding: 0.95rem 1.75rem;
     font-weight: 700;
     letter-spacing: 0.02em;
     cursor: pointer;
-    box-shadow: 0 18px 35px rgba(255,76,103,0.18);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .button-primary:hover,
 button[type="submit"]:hover,
 .btn-play:hover {
     transform: translateY(-2px);
-    box-shadow: 0 22px 42px rgba(255,76,103,0.22);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
 }
 
 .button-secondary {
@@ -211,14 +199,29 @@ button[type="submit"]:hover,
 }
 
 .media-grid {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1.5rem;
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(180px, 1fr)) !important;
+    grid-auto-rows: auto !important;
+    justify-content: center !important;
+    justify-items: center !important;
+    gap: 1.5rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1100px) {
     .media-grid {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(4, minmax(180px, 1fr)) !important;
+        gap: 1.5rem !important;
+    }
+}
+
+@media (max-width: 660px) {
+    .media-grid {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(180px, 1fr)) !important;
+        gap: 1rem !important;
     }
 }
 
@@ -262,7 +265,7 @@ button[type="submit"]:hover,
 .media-card:hover,
 .library-card-link:hover {
     transform: translateY(-5px);
-    border-color: rgba(255,76,103,0.4);
+    border-color: var(--primary-color);
 }
 
 .admin-dashboard {
@@ -287,20 +290,14 @@ button[type="submit"]:hover,
 .media-card {
     position: relative;
     overflow: hidden;
-    border-radius: 24px;
+    border-radius: var(--radius);
     background: var(--surface-color);
     border: 1px solid var(--border-color);
     box-shadow: 0 8px 24px var(--shadow-color);
     transition: var(--transition);
-}
-
-.media-card img {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 2/3;
-    object-fit: cover;
-    border-radius: 24px;
-    transition: transform 0.35s ease;
+    width: 100% !important;
+    max-width: 240px !important;
+    margin: 0 auto !important;
 }
 
 .media-card:hover img {
@@ -430,20 +427,26 @@ button[type="submit"]:hover,
     border: 1px solid var(--border-color);
     border-radius: 24px;
     padding: 2rem;
-    max-width: 800px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
+    max-width: 85%;
+    width: 100vw;
+    max-height: 85%;
+    height: 100vh;
+    overflow-y: center;
 }
 
 .modal-body {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    height: 100%;
 }
 
 .modal-media {
     position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .modal-details {
@@ -454,6 +457,12 @@ button[type="submit"]:hover,
     width: 100%;
     height: auto;
     object-fit: cover;
+}
+
+#modal-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 .modal-details h2 {
@@ -468,8 +477,8 @@ button[type="submit"]:hover,
     width: min(520px, 100%);
     margin: 3.2rem auto;
     padding: 2.6rem;
-    border-radius: 28px;
-    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color);
 }
 
 .form-container h2 {
@@ -489,10 +498,10 @@ textarea,
 select {
     width: 100%;
     padding: 0.95rem 1rem;
-    border-radius: 16px;
-    border: 1px solid rgba(255,255,255,0.08);
-    background: rgba(255,255,255,0.05);
-    color: var(--text-color);
+    border-radius: var(--radius);
+    border: 1px solid #ccc;
+    background: #ffffff;
+    color: #000000;
     outline: none;
     font-size: 0.97rem;
 }
@@ -500,8 +509,8 @@ select {
 input:focus,
 textarea:focus,
 select:focus {
-    border-color: rgba(255,76,103,0.65);
-    background: rgba(255,255,255,0.08);
+    border-color: var(--primary-color);
+    background: #ffffff;
 }
 
 button[type="submit"] {

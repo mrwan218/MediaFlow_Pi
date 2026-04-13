@@ -77,10 +77,7 @@ $theme = $_SESSION['theme'] ?? 'dark';
         <div class="nav-links">
             <?php if (is_logged_in()): ?>
                 <a href="<?php echo is_admin() ? 'admin_dashboard.php' : 'dashboard.php'; ?>">Dashboard</a>
-                <?php if (is_admin()): ?>
-                    <a href="admin_settings.php">Settings</a>
-                <?php endif; ?>
-                <a href="profile.php">Profile</a>
+                <a href="settings.php">Settings</a>
                 <a href="logout.php">Logout</a>
             <?php else: ?>
                 <a href="login.php">Login</a>

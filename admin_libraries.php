@@ -59,75 +59,7 @@ if (isset($_GET['delete'])) {
 }
 
 require_once 'header.php';
-
-function normalize_windows_path($path) {
-    if (preg_match('/^[A-Za-z]:[\\\/]/', $path)) {
-        $drive = strtolower($path[0]);
-        $rest = substr($path, 2);
-        $rest = str_replace('\\', '/', $rest);
-        return "/$drive/$rest";
-    }
-    return $path;
-}
-
-function recursive_find_directory($base, $name, $maxDepth = 4, $currentDepth = 0) {
-    if ($currentDepth > $maxDepth) {
-        return null;
-    }
-
-    try {
-        $iterator = new DirectoryIterator($base);
-    } catch (UnexpectedValueException $e) {
-        return null;
-    }
-
-    foreach ($iterator as $item) {
-        if ($item->isDot() || !$item->isDir()) {
-            continue;
-        }
-
-        if (strcasecmp($item->getFilename(), $name) === 0) {
-            return $item->getPathname();
-        }
-
-        $found = recursive_find_directory($item->getPathname(), $name, $maxDepth, $currentDepth + 1);
-        if ($found) {
-            return $found;
-        }
-    }
-
-    return null;
-}
-
-function resolve_library_path($target) {
-    $target = trim($target);
-    if (empty($target)) {
-        return null;
-    }
-
-    $normalized = normalize_windows_path($target);
-    if (is_dir($normalized)) {
-        return $normalized;
-    }
-
-    if (is_dir($target)) {
-        return $target;
-    }
-
-    $folder = basename(str_replace('\\', '/', $target));
-    $searchRoots = ['/c', '/d', '/e', '/f', '/g', '/h'];
-    foreach ($searchRoots as $root) {
-        if (!is_dir($root)) {
-            continue;
-        }
-        $candidate = recursive_find_directory($root, $folder);
-        if ($candidate !== null) {
-            return $candidate;
-        }
-    }
-
-    return null;
-}
+require_once 'utils.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['add_library'])) {

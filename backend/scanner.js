@@ -81,7 +81,7 @@ async function scan() {
 
             // Check if already in DB
             const [rows] = await connection.execute(
-                'SELECT id FROM media_items WHERE file_hash = ?',
+                'SELECT id, title FROM media_items WHERE file_hash = ?',
                 [fileHash]
             );
 
@@ -104,6 +104,28 @@ async function scan() {
                         metadata.rating || 'R'
                     ]
                 );
+            } else {
+                // Check if existing record needs metadata update
+                const existing = rows[0];
+                if (!existing.title || existing.title === fileName) {
+                    console.log(`Updating metadata for: ${fileName}`);
+                    const metadata = await fetchMetadata(fileName);
+                    
+                    if (metadata.title) {
+                        await connection.execute(
+                            'UPDATE media_items SET title = ?, year = ?, overview = ?, poster_path = ?, backdrop_path = ?, rating = ? WHERE file_hash = ?',
+                            [
+                                metadata.title,
+                                metadata.year || null,
+                                metadata.overview || 'No overview available.',
+                                metadata.poster_path || null,
+                                metadata.backdrop_path || null,
+                                metadata.rating || 'R',
+                                fileHash
+                            ]
+                        );
+                    }
+                }
             }
         }
     }
@@ -202,33 +224,82 @@ function isVideoFile(filePath) {
 async function fetchMetadata(fileName) {
     // Clean file name for search
     let query = fileName.replace(/\.[^/.]+$/, "").replace(/[\.\_\-]/g, " ");
-    query = query.replace(/(1080p|720p|webrip|x264|bluray|h264|aac|dts|web-dl|brrip|repack|proper)/gi, "").trim();
+    query = query.replace(/(1080p|720p|webrip|x264|bluray|h264|aac|dts|web-dl|brrip|repack|proper|eng|cr)/gi, "").trim();
+
+    // Check if this looks like a TV episode (S01E01 pattern)
+    const tvEpisodePattern = /(.*?)s(\d+)e(\d+)/i;
+    const tvMatch = query.match(tvEpisodePattern);
+    
+    let searchType = 'movie';
+    let searchQuery = query;
+    
+    if (tvMatch) {
+        // This is a TV episode, search for the show name
+        searchQuery = tvMatch[1].trim();
+        searchType = 'tv';
+    }
 
     try {
-        const response = await axios.get(`${TMDB_BASE_URL}/search/movie`, {
+        const searchEndpoint = searchType === 'tv' ? 'search/tv' : 'search/movie';
+        const response = await axios.get(`${TMDB_BASE_URL}/${searchEndpoint}`, {
             params: {
                 api_key: TMDB_API_KEY,
-                query: query
+                query: searchQuery
             }
         });
 
         if (response.data.results && response.data.results.length > 0) {
             const result = response.data.results[0];
             
-            // Get detailed info for rating
-            const details = await axios.get(`${TMDB_BASE_URL}/movie/${result.id}/release_dates`, {
-                params: { api_key: TMDB_API_KEY }
-            });
-
             let rating = 'R'; // Default
-            const usRelease = details.data.results.find(r => r.iso_3166_1 === 'US');
-            if (usRelease && usRelease.release_dates.length > 0) {
-                rating = usRelease.release_dates[0].certification || 'R';
+            let detailsEndpoint, detailsId;
+            
+            if (searchType === 'tv') {
+                // For TV shows, get content ratings
+                detailsEndpoint = `tv/${result.id}/content_ratings`;
+                detailsId = result.id;
+            } else {
+                // For movies, get release dates
+                detailsEndpoint = `movie/${result.id}/release_dates`;
+                detailsId = result.id;
+            }
+            
+            try {
+                const details = await axios.get(`${TMDB_BASE_URL}/${detailsEndpoint}`, {
+                    params: { api_key: TMDB_API_KEY }
+                });
+
+                if (searchType === 'tv') {
+                    const usRating = details.data.results.find(r => r.iso_3166_1 === 'US');
+                    if (usRating) {
+                        // Map TV ratings to movie ratings
+                        const tvRating = usRating.rating;
+                        const ratingMap = {
+                            'TV-Y': 'G',
+                            'TV-Y7': 'G', 
+                            'TV-G': 'G',
+                            'TV-PG': 'PG',
+                            'TV-14': 'PG-13',
+                            'TV-MA': 'R',
+                            'NC-17': 'NC-17'
+                        };
+                        rating = ratingMap[tvRating] || 'R';
+                    }
+                } else {
+                    const usRelease = details.data.results.find(r => r.iso_3166_1 === 'US');
+                    if (usRelease && usRelease.release_dates.length > 0) {
+                        rating = usRelease.release_dates[0].certification || 'R';
+                    }
+                }
+            } catch (detailsError) {
+                console.warn(`Could not fetch rating details for ${fileName}:`, detailsError.message);
             }
 
             return {
-                title: result.title,
-                year: result.release_date ? result.release_date.split('-')[0] : null,
+                title: searchType === 'tv' ? result.name : result.title,
+                year: searchType === 'tv' ? 
+                    (result.first_air_date ? result.first_air_date.split('-')[0] : null) :
+                    (result.release_date ? result.release_date.split('-')[0] : null),
                 overview: result.overview,
                 poster_path: result.poster_path,
                 backdrop_path: result.backdrop_path,

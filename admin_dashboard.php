@@ -64,7 +64,7 @@ $stats['recent_users'] = $result->fetch_all(MYSQLI_ASSOC);
             <a href="admin_libraries.php" class="action-card"><h3>📁 Libraries</h3><p>Add, remove, or configure media libraries.</p></a>
             <a href="admin_permissions.php" class="action-card"><h3>👥 Permissions</h3><p>Control user access to private libraries and content ratings.</p></a>
             <a href="admin_users.php" class="action-card"><h3>🔐 Users</h3><p>Manage user accounts and roles.</p></a>
-            <a href="admin_settings.php" class="action-card"><h3>⚙️ Settings</h3><p>Configure admin preferences and theme style.</p></a>
+            <a href="settings.php" class="action-card"><h3>⚙️ Settings</h3><p>Configure admin preferences and theme style.</p></a>
             <a href="run_scan.php" class="action-card"><h3>🔄 Scan Now</h3><p>Run the media scanner to update the library.</p></a>
         </div>
     </div>

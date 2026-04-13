@@ -85,9 +85,10 @@ header('ETag: "' . $etag . '"');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Range');
 header('Access-Control-Expose-Headers: Content-Range, Accept-Ranges');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Headers: Range');
-header('Access-Control-Expose-Headers: Content-Range, Accept-Ranges');
+
+$start = 0;
+$end = $file_size - 1;
+$buffer_size = 8192; // 8KB buffer
 
 if (isset($_SERVER['HTTP_RANGE'])) {
     $c_start = $start;
