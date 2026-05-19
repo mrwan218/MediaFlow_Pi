@@ -100,7 +100,20 @@ foreach ($tables as $name => $sql) {
     }
 }
 
-// 5. Create App User and Grant Privileges
+// 5. Create default admin user
+$default_admin_username = 'admin';
+$default_admin_email = 'admin@example.com';
+$default_admin_password_hash = '$2y$10$jmNCeFpEin5ScJuonfKROOcD.VHrSUOAvriGlK6waTeUMUyAl29MW';
+$insert_admin_sql = "INSERT INTO users (username, email, password_hash, role) ";
+$insert_admin_sql .= "SELECT '$default_admin_username', '$default_admin_email', '$default_admin_password_hash', 'admin' FROM DUAL ";
+$insert_admin_sql .= "WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = '$default_admin_username' OR email = '$default_admin_email')";
+if ($conn->query($insert_admin_sql)) {
+    echo "<p>✓ Default admin user ready.</p>";
+} else {
+    echo "<p style='color:#ff9800;'>Warning: Could not insert default admin user: " . $conn->error . "</p>";
+}
+
+// 6. Create App User and Grant Privileges
 echo "<h3>Configuring User Privileges...</h3>";
 // In Docker, we use '%' for host to allow connections from other containers
 $conn->query("CREATE USER IF NOT EXISTS '$app_user'@'%' IDENTIFIED BY '$app_pass'");

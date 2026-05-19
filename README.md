@@ -19,6 +19,15 @@ docker-compose up -d
 
 4. Access the application at http://localhost:8080
 
+## Default Admin Account
+A default administrator account is seeded during database initialization.
+
+- Username: `admin`
+- Email: `admin@example.com`
+- Password: `Admin@123`
+
+> For security, change the default admin password immediately after first login.
+
 ## Services
 
 - **PHP App**: Main web interface (port 8080)

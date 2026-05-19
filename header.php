@@ -38,7 +38,7 @@ if (!is_logged_in() && !in_array(basename($_SERVER['PHP_SELF']), $public_pages))
 
 // If the user IS logged in, refresh their session data and set theme
 if (is_logged_in()) {
-    $stmt = $conn->prepare("SELECT username, role, theme, max_allowed_rating FROM users WHERE id = ?");
+    $stmt = $conn->prepare("SELECT username, email, role, theme, max_allowed_rating FROM users WHERE id = ?");
     $stmt->bind_param("i", $_SESSION['user_id']);
     $stmt->execute();
     $result = $stmt->get_result();

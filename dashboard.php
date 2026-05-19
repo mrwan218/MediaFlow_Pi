@@ -30,8 +30,13 @@ if (file_exists($config_file_path)) {
     } else {
         $all_libraries = $config['libraries'] ?? [];
 
-        // 3. Filter the libraries based on permissions (public or granted).
+        // 3. Filter the libraries based on permissions (public or granted) and path existence.
         foreach ($all_libraries as $library) {
+            // Check if the library path exists
+            if (!file_exists($library['path']) || !is_dir($library['path'])) {
+                continue; // Skip this library, path no longer exists
+            }
+            
             if ($library['public'] || in_array($library['name'], $granted_library_names)) {
                 $accessible_libraries[] = $library;
             }

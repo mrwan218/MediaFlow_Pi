@@ -108,6 +108,21 @@ $libraries = $config['libraries'] ?? [];
 if ($config === null) {
     $errors[] = "Warning: Could not get a stable lock on the config file.";
 }
+
+// Validate library paths and remove missing ones
+$valid_libraries = [];
+foreach ($libraries as $lib) {
+    if (file_exists($lib['path']) && is_dir($lib['path'])) {
+        $valid_libraries[] = $lib;
+    } else {
+        // Remove library from config if path no longer exists
+        $config['libraries'] = array_filter($config['libraries'], function($l) use ($lib) {
+            return $l['name'] !== $lib['name'];
+        });
+        write_config_safely($config_file_path, $config);
+    }
+}
+$libraries = $valid_libraries;
 ?>
 
 <div class="admin-container">

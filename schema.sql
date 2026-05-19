@@ -14,6 +14,13 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
+INSERT IGNORE INTO users (username, email, password_hash, role) VALUES (
+    'admin',
+    'admin@example.com',
+    '$2y$10$jmNCeFpEin5ScJuonfKROOcD.VHrSUOAvriGlK6waTeUMUyAl29MW',
+    'admin'
+);
+
 -- Media items table
 CREATE TABLE IF NOT EXISTS media_items (
     id INT AUTO_INCREMENT PRIMARY KEY,

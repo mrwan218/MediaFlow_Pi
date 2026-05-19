@@ -6,46 +6,59 @@ if (!isset($_GET['name']) || empty(trim($_GET['name']))) {
     $library_name = urldecode(trim($_GET['name']));
     $media_items = [];
     $is_allowed = false;
+    $library_path = null;
     $config_file_path = __DIR__ . '/backend/config.json';
+    
+    // Load config and get library path
     if (file_exists($config_file_path)) {
         $config = json_decode(file_get_contents($config_file_path), true);
         foreach ($config['libraries'] as $lib) {
-            if ($lib['name'] === $library_name && $lib['public']) {
-                $is_allowed = true;
+            if ($lib['name'] === $library_name) {
+                $library_path = $lib['path'];
+                if ($lib['public']) {
+                    $is_allowed = true;
+                }
                 break;
             }
         }
     }
-    if (!$is_allowed) {
-        $stmt = $conn->prepare("SELECT 1 FROM user_library_access WHERE user_id = ? AND library_name = ?");
-        $stmt->bind_param("is", $_SESSION['user_id'], $library_name);
-        $stmt->execute();
-        $stmt->store_result();
-        if ($stmt->num_rows === 1) {
-            $is_allowed = true;
-        }
-        $stmt->close();
-    }
-    if ($is_allowed) {
-        $rating_hierarchy = ['G' => 1, 'PG' => 2, 'PG-13' => 3, 'R' => 4, 'NC-17' => 5];
-        $user_max_rating = $_SESSION['max_allowed_rating'] ?? 'R';
-        $user_max_level = $rating_hierarchy[$user_max_rating];
-
-        $stmt = $conn->prepare("SELECT id, file_path, title, year, poster_path, overview, backdrop_path, rating FROM media_items WHERE library_name = ? ORDER BY title ASC");
-        $stmt->bind_param("s", $library_name);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $all_items = $result->fetch_all(MYSQLI_ASSOC);
-        $media_items = [];
-        foreach ($all_items as $item) {
-            $item_rating = $item['rating'] ?? 'R';
-            $item_level = $rating_hierarchy[$item_rating] ?? 4;
-            if ($item_level <= $user_max_level) {
-                $media_items[] = $item;
+    
+    // Check if library path exists
+    if ($library_path === null || !file_exists($library_path) || !is_dir($library_path)) {
+        echo '<div class="library-header"><a href="dashboard.php" class="back-link">&larr; Back to Dashboard</a><h1>' . htmlspecialchars($library_name) . '</h1></div>';
+        echo '<div class="dashboard-card full-width"><h2>Library Not Found</h2><p>This library path no longer exists or is inaccessible.</p></div>';
+    } else {
+        // Check user permissions if not public
+        if (!$is_allowed) {
+            $stmt = $conn->prepare("SELECT 1 FROM user_library_access WHERE user_id = ? AND library_name = ?");
+            $stmt->bind_param("is", $_SESSION['user_id'], $library_name);
+            $stmt->execute();
+            $stmt->store_result();
+            if ($stmt->num_rows === 1) {
+                $is_allowed = true;
             }
+            $stmt->close();
         }
-        $stmt->close();
-    }
+        if ($is_allowed) {
+            $rating_hierarchy = ['G' => 1, 'PG' => 2, 'PG-13' => 3, 'R' => 4, 'NC-17' => 5];
+            $user_max_rating = $_SESSION['max_allowed_rating'] ?? 'R';
+            $user_max_level = $rating_hierarchy[$user_max_rating];
+
+            $stmt = $conn->prepare("SELECT id, file_path, title, year, poster_path, overview, backdrop_path, rating FROM media_items WHERE library_name = ? ORDER BY title ASC");
+            $stmt->bind_param("s", $library_name);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $all_items = $result->fetch_all(MYSQLI_ASSOC);
+            $media_items = [];
+            foreach ($all_items as $item) {
+                $item_rating = $item['rating'] ?? 'R';
+                $item_level = $rating_hierarchy[$item_rating] ?? 4;
+                if ($item_level <= $user_max_level) {
+                    $media_items[] = $item;
+                }
+            }
+            $stmt->close();
+        }
 ?>
     <div class="library-header">
         <a href="dashboard.php" class="back-link">&larr; Back to Dashboard</a>
@@ -79,6 +92,7 @@ if (!isset($_GET['name']) || empty(trim($_GET['name']))) {
             <?php endforeach; ?>
         <?php endif; ?>
     </div>
+        <?php } ?>
     <div id="media-modal" class="media-modal" style="display: none;">
         <div class="modal-content">
             <span class="modal-close" onclick="closeModal()">&times;</span>
