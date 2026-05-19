@@ -6,28 +6,47 @@ if (!is_admin()) {
 }
 
 function read_config_safely($path, $lock_path) {
-    $lock_handle = fopen($lock_path, 'w');
-    if (flock($lock_handle, LOCK_EX)) {
-        if (!file_exists($path)) {
-            flock($lock_handle, LOCK_UN); fclose($lock_handle);
-            return ['libraries' => [], 'supported_video_formats' => []];
+    $lock_handle = @fopen($lock_path, 'c+');
+    if ($lock_handle !== false) {
+        if (flock($lock_handle, LOCK_EX)) {
+            if (!file_exists($path)) {
+                flock($lock_handle, LOCK_UN);
+                fclose($lock_handle);
+                return ['libraries' => [], 'supported_video_formats' => []];
+            }
+            $json_data = @file_get_contents($path);
+            flock($lock_handle, LOCK_UN);
+            fclose($lock_handle);
+            if ($json_data === false) {
+                return ['libraries' => [], 'supported_video_formats' => []];
+            }
+            $config = json_decode($json_data, true);
+            return $config ?: ['libraries' => [], 'supported_video_formats' => []];
         }
-        $json_data = file_get_contents($path);
-        $config = json_decode($json_data, true);
-        flock($lock_handle, LOCK_UN); fclose($lock_handle);
-        return $config ?: ['libraries' => [], 'supported_video_formats' => []];
+        fclose($lock_handle);
     }
-    fclose($lock_handle);
-    return null;
+
+    // Fallback: if locking is unavailable, read config without a lock.
+    if (!file_exists($path)) {
+        return ['libraries' => [], 'supported_video_formats' => []];
+    }
+    $json_data = @file_get_contents($path);
+    if ($json_data === false) {
+        return ['libraries' => [], 'supported_video_formats' => []];
+    }
+    $config = json_decode($json_data, true);
+    return $config ?: ['libraries' => [], 'supported_video_formats' => []];
 }
 
 function write_config_safely($path, $data) {
     $temp_path = $path . '.tmp.' . uniqid();
-    if (file_put_contents($temp_path, json_encode($data, JSON_PRETTY_PRINT), LOCK_EX) === false) {
-        @unlink($temp_path); return false;
+    if (@file_put_contents($temp_path, json_encode($data, JSON_PRETTY_PRINT), LOCK_EX) === false) {
+        @unlink($temp_path);
+        return false;
     }
-    if (!rename($temp_path, $path)) {
-        @unlink($temp_path); return false;
+    if (!@rename($temp_path, $path)) {
+        @unlink($temp_path);
+        return false;
     }
     return true;
 }
