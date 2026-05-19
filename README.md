@@ -54,8 +54,19 @@ Edit `backend/config.json` to configure your media library paths:
 }
 ```
 
+### Default Database Credentials
+The application comes with default database configuration for quick setup:
+
+- **Database Host**: `mysql` (Docker service name)
+- **Database Name**: `mediaflow_db`
+- **Database User**: `mediaflow_user`
+- **Database Password**: `change_this_password`
+- **MySQL Root Password**: `rootpassword`
+
+> **Important**: For production environments, change these default passwords immediately.
+
 ### Environment Variables
-Configure database and API settings in `.env`:
+Configure database and API settings in `.env`. Below are the default values that work out-of-the-box:
 
 ```
 DB_SERVER=mysql
@@ -70,11 +81,11 @@ TMDB_API_KEY=your_tmdb_api_key_here
 ### Required Environment Variables
 The application requires the following environment variables to be set:
 
-- `DB_SERVER`: Database host (default: mysql)
-- `DB_USERNAME`: Database user (default: mediaflow_user)
-- `DB_PASSWORD`: Database password (required, no default)
-- `DB_NAME`: Database name (default: mediaflow_db)
-- `TMDB_API_KEY`: TMDB API key (required, no default)
+- `DB_SERVER`: Database host (default: `mysql`)
+- `DB_USERNAME`: Database user (default: `mediaflow_user`)
+- `DB_PASSWORD`: Database password (default: `change_this_password`)
+- `DB_NAME`: Database name (default: `mediaflow_db`)
+- `TMDB_API_KEY`: TMDB API key (required, must be obtained from https://www.themoviedb.org/settings/api)
 
 ### Setup Steps
 1. Copy `.env.example` to `.env`:
