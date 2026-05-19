@@ -36,7 +36,6 @@ A default administrator account is seeded during database initialization.
 
 ## Configuration
 
-### Database
 The database is automatically initialized with the schema from `schema.sql`.
 
 ### Media Libraries
@@ -55,20 +54,24 @@ Edit `backend/config.json` to configure your media library paths:
 ```
 
 ### Default Database Credentials
-The application comes with default database configuration for quick setup:
+Use these defaults for local Docker setup:
 
-- **Database Host**: `mysql` (Docker service name)
-- **Database Name**: `mediaflow_db`
-- **Database User**: `mediaflow_user`
-- **Database Password**: `change_this_password`
-- **MySQL Root Password**: `rootpassword`
+- `DB_SERVER=mysql`
+- `DB_USERNAME=mediaflow_user`
+- `DB_PASSWORD=change_this_password`
+- `DB_NAME=mediaflow_db`
+- `MYSQL_ROOT_PASSWORD=rootpassword`
 
-> **Important**: For production environments, change these default passwords immediately.
+> Change these values before deploying to production.
 
 ### Environment Variables
-Configure database and API settings in `.env`. Below are the default values that work out-of-the-box:
+Copy `.env.example` to `.env` and update the values as needed:
 
+```bash
+cp .env.example .env
 ```
+
+```dotenv
 DB_SERVER=mysql
 DB_USERNAME=mediaflow_user
 DB_PASSWORD=change_this_password
@@ -76,47 +79,16 @@ DB_NAME=mediaflow_db
 TMDB_API_KEY=your_tmdb_api_key_here
 ```
 
-## Deployment and Environment Handling
+### Deployment Notes
+- `TMDB_API_KEY` must be obtained from https://www.themoviedb.org/settings/api
+- Do not commit `.env` to version control
+- For production, use secure passwords and consider Docker secrets
 
-### Required Environment Variables
-The application requires the following environment variables to be set:
-
-- `DB_SERVER`: Database host (default: `mysql`)
-- `DB_USERNAME`: Database user (default: `mediaflow_user`)
-- `DB_PASSWORD`: Database password (default: `change_this_password`)
-- `DB_NAME`: Database name (default: `mediaflow_db`)
-- `TMDB_API_KEY`: TMDB API key (required, must be obtained from https://www.themoviedb.org/settings/api)
-
-### Setup Steps
-1. Copy `.env.example` to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-
-2. Edit `.env` with your actual values:
-   - Get a TMDB API key from https://www.themoviedb.org/settings/api
-   - Set a secure database password
-   - Adjust database settings if needed
-
-3. Ensure all required variables are set. The app will fail to start with clear error messages if any are missing.
-
-### Troubleshooting Environment Issues
-- **Database connection fails**: Check `DB_*` variables in `.env`
-- **TMDB API errors**: Verify `TMDB_API_KEY` is valid
-- **Scanner can't find files**: Ensure library paths in `backend/config.json` are accessible in the container
+### Troubleshooting
+- **Database connection fails**: Verify `DB_SERVER`, `DB_USERNAME`, `DB_PASSWORD`, and `DB_NAME`
+- **TMDB API errors**: Check that `TMDB_API_KEY` is valid
+- **Scanner issues**: Ensure library paths in `backend/config.json` are accessible in the container
 - **Permission errors**: Check Docker volume mounts and file permissions
-
-### Production Deployment
-For production:
-- Use strong, unique passwords
-- Set `DB_SERVER` to your production database host
-- Ensure `.env` is not committed to version control (it's in `.gitignore`)
-- Use Docker secrets or external secret management for sensitive data
-
-1. Register a new account or login
-2. Configure media libraries (admin only)
-3. Run the scanner to index media files
-4. Browse and stream your media
 
 ## Development
 
